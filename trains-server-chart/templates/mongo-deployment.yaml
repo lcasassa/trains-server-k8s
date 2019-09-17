@@ -27,12 +27,42 @@ spec:
         - mountPath: /data/configdb
           name: mongo-hostpath1
       restartPolicy: Always
+{{- with .Values.nodeSelector }}
       nodeSelector:
-        {{ .Values.trains.nodeSelector}}
+{{ toYaml . | indent 8 }}
+{{- end }}
       volumes:
       - name: mongo-hostpath0
-        hostPath:
-          path: /data/db
+        persistentVolumeClaim:
+          claimName: mongo-db
       - name: mongo-hostpath1
-        hostPath:
-          path: /data/configdb
+        persistentVolumeClaim:
+          claimName: mongo-conf
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-db
+spec:
+  storageClassName: gp2-eu-west-1c
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-conf
+spec:
+  storageClassName: gp2-eu-west-1c
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi

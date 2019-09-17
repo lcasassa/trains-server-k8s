@@ -35,8 +35,10 @@ spec:
           - mountPath: /opt/trains/config
             name: apiserver-hostpath1
       restartPolicy: Always
+{{- with .Values.nodeSelector }}
       nodeSelector:
-        {{ .Values.trains.nodeSelector}}
+{{ toYaml . | indent 8 }}
+{{- end }}
       volumes:
       - name: apiserver-hostpath0
         hostPath:
@@ -44,3 +46,7 @@ spec:
       - name: apiserver-hostpath1
         hostPath:
           path: /opt/trains/config
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}

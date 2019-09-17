@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    platform: trains
+  name: conf
+  namespace: {{ .Values.trains.namespace }}
+data:
+  README: Hello World
+{{- with .Values.config }}
+{{ toYaml . | indent 2 }}
+{{- end }}

@@ -23,7 +23,7 @@ spec:
         image: busybox:1.29.2
         command: ['sh', '-c', 'chown -R 1000:1000 /usr/share/elasticsearch/data']
         volumeMounts:
-        - name: elasticsearch-hostpath
+        - name: elasticsearch
           mountPath: /usr/share/elasticsearch/data
       containers:
       - env:
@@ -65,11 +65,29 @@ spec:
         - containerPort: 9200
         volumeMounts:
         - mountPath: /usr/share/elasticsearch/data
-          name: elasticsearch-hostpath
+          name: elasticsearch
       restartPolicy: Always
+{{- with .Values.nodeSelector }}
       nodeSelector:
-        {{ .Values.trains.nodeSelector}}
+{{ toYaml . | indent 8 }}
+{{- end }}
       volumes:
-      - name: elasticsearch-hostpath
-        hostPath:
-          path: /usr/share/elasticsearch/data
+      - name: elasticsearch
+        persistentVolumeClaim:
+          claimName: elasticsearch
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch
+spec:
+  storageClassName: gp2-eu-west-1c
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi

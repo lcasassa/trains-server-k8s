@@ -1,5 +1,7 @@
 trains:
-  nodeSelector: "app: trains"
+  nodeSelector:
+    app: trains
+  tolerations: []
   namespace: trains
   image:
     repository: allegroai/trains-server

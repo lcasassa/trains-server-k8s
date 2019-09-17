@@ -25,16 +25,26 @@ spec:
         - fileserver
         volumeMounts:
         - mountPath: /var/log/trains
-          name: fileserver-hostpath0
+          name: storage
+          subPath: trains-logs
         - mountPath: /mnt/fileserver
-          name: fileserver-hostpath1
+          name: storage
+          subPath: trains
       restartPolicy: Always
+{{- with .Values.nodeSelector }}
       nodeSelector:
-        {{ .Values.trains.nodeSelector}}
+{{ toYaml . | indent 8 }}
+{{- end }}
       volumes:
-      - name: fileserver-hostpath0
-        hostPath:
-          path: /var/log/trains
-      - name: fileserver-hostpath1
-        hostPath:
-          path: /mnt/fileserver
+      - flexVolume:
+          driver: ceph.rook.io/rook
+          fsType: ceph
+          options:
+            clusterNamespace: rook-ceph
+            fsName: ml-fs
+        name: storage
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+
